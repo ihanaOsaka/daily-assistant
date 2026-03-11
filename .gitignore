@@ -1,0 +1,25 @@
+# Environment variables
+.env
+.env.local
+
+# Google OAuth tokens
+token.json
+credentials.json
+*.pickle
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code local settings
+.claude/settings.local.json
