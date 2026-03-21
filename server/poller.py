@@ -1,4 +1,12 @@
-"""Poller: monitors task queue and executes via Claude CLI."""
+"""Poller: monitors Vercel task queue and executes via Claude CLI.
+
+Usage:
+    # For Vercel deployment
+    API_BASE=https://your-app.vercel.app POLLER_API_KEY=your-key python poller.py
+
+    # For local development
+    API_BASE=http://localhost:3000 python poller.py
+"""
 import subprocess
 import requests
 import time
@@ -8,7 +16,8 @@ import signal
 import logging
 from datetime import datetime
 
-API_BASE = os.environ.get("API_BASE", "http://localhost:8080")
+API_BASE = os.environ.get("API_BASE", "http://localhost:3000")
+POLLER_API_KEY = os.environ.get("POLLER_API_KEY", "")
 POLL_INTERVAL = int(os.environ.get("POLL_INTERVAL", "30"))
 PROJECT_DIR = os.environ.get("PROJECT_DIR", str(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -46,10 +55,32 @@ CATEGORY_PREFIX = {
 }
 
 
+def get_headers() -> dict:
+    """Build request headers with optional API key authentication."""
+    headers = {"Content-Type": "application/json"}
+    if POLLER_API_KEY:
+        headers["X-Poller-Key"] = POLLER_API_KEY
+    return headers
+
+
 def poll_once() -> bool:
     """Poll for one task, execute it, report result. Returns True if a task was processed."""
     try:
-        resp = requests.get(f"{API_BASE}/api/tasks/poll", timeout=10)
+        params = {}
+        if POLLER_API_KEY:
+            params["key"] = POLLER_API_KEY
+
+        resp = requests.get(
+            f"{API_BASE}/api/tasks/poll",
+            params=params,
+            headers=get_headers(),
+            timeout=10,
+        )
+
+        if resp.status_code == 204:
+            # No pending tasks
+            return False
+
         if resp.status_code != 200:
             log.warning(f"Poll failed: HTTP {resp.status_code}")
             return False
@@ -109,7 +140,8 @@ def report_result(task_id: int, status: str, result: str = None, error: str = No
         requests.patch(
             f"{API_BASE}/api/tasks/{task_id}/result",
             json={"status": status, "result": result, "error": error},
-            timeout=10,
+            headers=get_headers(),
+            timeout=30,
         )
     except Exception as e:
         log.error(f"Failed to report result for task #{task_id}: {e}")
@@ -118,6 +150,10 @@ def report_result(task_id: int, status: str, result: str = None, error: str = No
 def main():
     log.info(f"Starting poller (interval={POLL_INTERVAL}s, project={PROJECT_DIR})")
     log.info(f"API: {API_BASE}")
+    if POLLER_API_KEY:
+        log.info("API key authentication enabled")
+    else:
+        log.info("No API key set (local development mode)")
 
     while running:
         task_found = poll_once()

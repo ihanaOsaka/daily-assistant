@@ -27,3 +27,8 @@ Thumbs.db
 
 # Task queue database
 server/data/queue.db
+
+# Next.js
+web/.next/
+web/local.db
+web/.env.local
