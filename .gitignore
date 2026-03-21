@@ -24,3 +24,6 @@ Thumbs.db
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Task queue database
+server/data/queue.db

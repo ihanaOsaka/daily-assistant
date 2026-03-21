@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Login - Daily Assistant</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <h1>Daily Assistant</h1>
+    <form id="login-form">
+      <input type="password" id="password" placeholder="パスワード" required autofocus>
+      <button type="submit" class="btn-primary">ログイン</button>
+      <p id="login-error" class="error-text" hidden>パスワードが違います</p>
+    </form>
+  </div>
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({password: document.getElementById('password').value})
+      });
+      if (res.ok) window.location.href = '/';
+      else document.getElementById('login-error').hidden = false;
+    });
+  </script>
+</body>
+</html>

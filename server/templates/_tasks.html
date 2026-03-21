@@ -1,0 +1,14 @@
+{% for task in tasks %}
+<div class="card queue-card {{ task.status }}">
+  <div class="card-header">
+    <span class="badge badge-{{ task.status }}">
+      {% if task.status == 'pending' %}待機中
+      {% elif task.status == 'processing' %}実行中
+      {% elif task.status == 'completed' %}完了
+      {% else %}失敗{% endif %}
+    </span>
+    <span class="time">{{ task.created_at }}</span>
+  </div>
+  <p class="command-text">{{ task.command }}</p>
+</div>
+{% endfor %}

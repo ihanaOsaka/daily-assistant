@@ -1,0 +1,46 @@
+{% if processing %}
+<div class="card processing-card">
+  <div class="card-header">
+    <span class="badge badge-processing">実行中</span>
+    <span class="time">{{ processing.started_at }}</span>
+  </div>
+  <p class="command-text">{{ processing.command }}</p>
+</div>
+{% endif %}
+
+{% if pending_count > 0 %}
+<div class="card info-card">
+  <p>待機中のタスク: <strong>{{ pending_count }}件</strong></p>
+</div>
+{% endif %}
+
+{% if recent %}
+<h3 class="section-title">最近の結果</h3>
+{% for task in recent %}
+<div class="card result-card {{ task.status }}">
+  <div class="card-header">
+    <span class="badge badge-{{ task.status }}">{{ '完了' if task.status == 'completed' else '失敗' }}</span>
+    <span class="category-tag">{{ task.category }}</span>
+    <span class="time">{{ task.completed_at }}</span>
+  </div>
+  <p class="command-text">{{ task.command }}</p>
+  {% if task.result %}
+  <details>
+    <summary>結果を表示</summary>
+    <div class="result-body">{{ task.result }}</div>
+  </details>
+  {% endif %}
+  {% if task.error %}
+  <details>
+    <summary>エラー詳細</summary>
+    <div class="result-body error-body">{{ task.error }}</div>
+  </details>
+  {% endif %}
+</div>
+{% endfor %}
+{% else %}
+<div class="empty-state">
+  <p>まだ実行結果がありません</p>
+  <p class="hint">「指示」タブからタスクを送信してください</p>
+</div>
+{% endif %}

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Daily Assistant</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/htmx.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Daily Assistant</h1>
+    <span id="status-dot" class="status-dot"
+          hx-get="/api/status" hx-trigger="every 10s"
+          hx-swap="none"
+          hx-on::after-request="updateStatus(event)">
+    </span>
+  </header>
+
+  <main>
+    <!-- Tab navigation -->
+    <nav class="tabs">
+      <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">ホーム</button>
+      <button class="tab" data-tab="command" onclick="switchTab('command')">指示</button>
+      <button class="tab" data-tab="queue" onclick="switchTab('queue')">キュー</button>
+    </nav>
+
+    <!-- Dashboard -->
+    <section id="tab-dashboard" class="tab-content active"
+             hx-get="/partials/dashboard" hx-trigger="load, every 5s" hx-swap="innerHTML">
+      <div class="loading">読み込み中...</div>
+    </section>
+
+    <!-- Command input -->
+    <section id="tab-command" class="tab-content">
+      <div class="card">
+        <h2>指示を送信</h2>
+        <form id="command-form" onsubmit="submitCommand(event)">
+          <textarea name="command" id="command-input" rows="4"
+                    placeholder="指示を入力...（例: 今日の予定を確認して）" required></textarea>
+          <div class="form-row">
+            <select name="category" id="category-select">
+              <option value="general">一般</option>
+              <option value="calendar">予定</option>
+              <option value="tasks">タスク</option>
+              <option value="mail">メール</option>
+              <option value="research">調査</option>
+              <option value="dev">開発</option>
+            </select>
+            <select name="priority" id="priority-select">
+              <option value="0">通常</option>
+              <option value="1">高</option>
+              <option value="2">緊急</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-primary">送信</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>クイックアクション</h3>
+        <div class="quick-actions">
+          <button class="btn-quick" onclick="quickSend('朝のルーティンを実行して', 'general')">朝のルーティン</button>
+          <button class="btn-quick" onclick="quickSend('今日の予定を確認して', 'calendar')">今日の予定</button>
+          <button class="btn-quick" onclick="quickSend('未完了タスクを一覧して', 'tasks')">タスク一覧</button>
+          <button class="btn-quick" onclick="quickSend('重要な未読メールを確認して', 'mail')">メール確認</button>
+          <button class="btn-quick" onclick="quickSend('夕方の振り返りを実行して', 'general')">夕方の振り返り</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Queue -->
+    <section id="tab-queue" class="tab-content">
+      <div class="queue-filters">
+        <button class="filter active" onclick="filterQueue(this, '')">全て</button>
+        <button class="filter" onclick="filterQueue(this, 'pending')">待機中</button>
+        <button class="filter" onclick="filterQueue(this, 'processing')">実行中</button>
+        <button class="filter" onclick="filterQueue(this, 'completed')">完了</button>
+        <button class="filter" onclick="filterQueue(this, 'failed')">失敗</button>
+      </div>
+      <div id="queue-list"
+           hx-get="/partials/queue" hx-trigger="load, every 5s" hx-swap="innerHTML">
+        <div class="loading">読み込み中...</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Tab switching
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+      document.querySelectorAll('.tab-content').forEach(s => s.classList.toggle('active', s.id === 'tab-' + name));
+    }
+
+    // Status indicator
+    function updateStatus(evt) {
+      const dot = document.getElementById('status-dot');
+      dot.className = 'status-dot ' + (evt.detail.successful ? 'online' : 'offline');
+    }
+
+    // Command form submit
+    function submitCommand(e) {
+      e.preventDefault();
+      const command = document.getElementById('command-input').value;
+      const category = document.getElementById('category-select').value;
+      const priority = parseInt(document.getElementById('priority-select').value);
+      fetch('/api/tasks', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({command, category, priority})
+      }).then(r => {
+        if (r.ok) {
+          document.getElementById('command-input').value = '';
+          showToast('指示を送信しました');
+          switchTab('queue');
+        } else {
+          showToast('送信に失敗しました', true);
+        }
+      });
+    }
+
+    // Quick actions
+    function quickSend(command, category) {
+      fetch('/api/tasks', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({command, category, priority: 0})
+      }).then(r => {
+        if (r.ok) { showToast('送信しました'); switchTab('queue'); }
+        else showToast('送信失敗', true);
+      });
+    }
+
+    // Queue filter
+    function filterQueue(btn, status) {
+      document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
+      btn.classList.add('active');
+      const el = document.getElementById('queue-list');
+      const url = '/partials/queue' + (status ? '?status=' + status : '');
+      el.setAttribute('hx-get', url);
+      htmx.trigger(el, 'load');
+    }
+
+    // Toast notification
+    function showToast(msg, isError) {
+      const toast = document.createElement('div');
+      toast.className = 'toast' + (isError ? ' error' : '');
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.classList.add('show'), 10);
+      setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2000);
+    }
+
+  </script>
+</body>
+</html>
