@@ -8,7 +8,8 @@ import signal
 import logging
 from datetime import datetime
 
-API_BASE = os.environ.get("API_BASE", "http://localhost:8080")
+API_BASE = os.environ.get("API_BASE", "https://daily-assistant-ihanaosakas-projects.vercel.app")
+POLLER_API_KEY = os.environ.get("POLLER_API_KEY", "")
 POLL_INTERVAL = int(os.environ.get("POLL_INTERVAL", "30"))
 PROJECT_DIR = os.environ.get("PROJECT_DIR", str(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -49,7 +50,12 @@ CATEGORY_PREFIX = {
 def poll_once() -> bool:
     """Poll for one task, execute it, report result. Returns True if a task was processed."""
     try:
-        resp = requests.get(f"{API_BASE}/api/tasks/poll", timeout=10)
+        poll_url = f"{API_BASE}/api/tasks/poll"
+        if POLLER_API_KEY:
+            poll_url += f"?key={POLLER_API_KEY}"
+        resp = requests.get(poll_url, timeout=10)
+        if resp.status_code == 204:
+            return False  # No pending tasks
         if resp.status_code != 200:
             log.warning(f"Poll failed: HTTP {resp.status_code}")
             return False
@@ -70,12 +76,17 @@ def poll_once() -> bool:
 
         # Execute via Claude CLI
         try:
+            env = os.environ.copy()
+            env["PYTHONIOENCODING"] = "utf-8"
             result = subprocess.run(
-                ["claude", "-p", full_prompt, "--project", PROJECT_DIR],
+                ["claude", "-p", full_prompt],
                 capture_output=True,
-                text=True,
                 timeout=TASK_TIMEOUT,
                 cwd=PROJECT_DIR,
+                shell=True,  # Required on Windows to find .cmd files
+                encoding="utf-8",
+                errors="replace",
+                env=env,
             )
 
             if result.returncode == 0:
@@ -106,8 +117,11 @@ def poll_once() -> bool:
 def report_result(task_id: int, status: str, result: str = None, error: str = None):
     """Report task execution result back to the API."""
     try:
+        url = f"{API_BASE}/api/tasks/{task_id}/result"
+        if POLLER_API_KEY:
+            url += f"?key={POLLER_API_KEY}"
         requests.patch(
-            f"{API_BASE}/api/tasks/{task_id}/result",
+            url,
             json={"status": status, "result": result, "error": error},
             timeout=10,
         )

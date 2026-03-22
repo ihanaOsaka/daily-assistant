@@ -22,6 +22,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // ポーラーからの API Key 認証（結果報告用）
+  const apiKey = request.nextUrl.searchParams.get('key');
+  const pollerApiKey = process.env.POLLER_API_KEY;
+  if (apiKey && pollerApiKey && apiKey === pollerApiKey) {
+    return NextResponse.next();
+  }
+
   const sessionToken = request.cookies.get('session_token')?.value;
   if (!sessionToken) {
     if (pathname.startsWith('/api/')) {
