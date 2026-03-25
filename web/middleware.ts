@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const PUBLIC_API_PATHS = ['/api/auth', '/api/tasks/poll', '/api/status']
+const PUBLIC_API_PATHS = ['/api/auth', '/api/tasks/poll', '/api/status', '/api/projects/seed']
 const PUBLIC_PAGE_PATHS = ['/login']
 
 export function middleware(request: NextRequest) {
