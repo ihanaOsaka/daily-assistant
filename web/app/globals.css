@@ -94,3 +94,30 @@ body {
 .toast-exit {
   animation: toast-out 0.2s ease-in forwards;
 }
+
+/* プロジェクトカード */
+.project-card {
+  transition: border-color 0.15s ease;
+}
+
+.project-card:hover {
+  border-color: #3a3a3a;
+}
+
+/* スクロールバー非表示ユーティリティ */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* テキスト省略 */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}

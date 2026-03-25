@@ -4,9 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const tabs = [
-  { href: "/", label: "ダッシュボード", icon: "🏠" },
+  { href: "/", label: "ホーム", icon: "🏠" },
+  { href: "/projects", label: "プロジェクト", icon: "📋" },
   { href: "/command", label: "指示", icon: "✏️" },
-  { href: "/queue", label: "キュー", icon: "📋" },
+  { href: "/queue", label: "キュー", icon: "📂" },
 ];
 
 export default function BottomNav() {
