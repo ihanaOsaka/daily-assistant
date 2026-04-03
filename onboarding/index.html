@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1on1 オンボーディング</title>
+<style>
+  :root {
+    --primary: #2d6a4f;
+    --primary-light: #40916c;
+    --primary-bg: #d8f3dc;
+    --accent: #e76f51;
+    --bg: #fafaf7;
+    --card-bg: #ffffff;
+    --text: #2b2b2b;
+    --text-light: #6b7280;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* --- Header --- */
+  .header {
+    background: var(--primary);
+    color: white;
+    padding: 16px 20px;
+    text-align: center;
+  }
+  .header h1 { font-size: 18px; font-weight: 600; }
+  .header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+
+  /* --- Progress --- */
+  .progress-area {
+    padding: 12px 20px;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--text-light);
+  }
+  .progress-bar {
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .timer {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  /* --- Screens --- */
+  .screen { display: none; flex-direction: column; flex: 1; }
+  .screen.active { display: flex; }
+
+  /* --- Start Screen --- */
+  .start-screen {
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  .start-screen h2 {
+    font-size: 24px;
+    color: var(--primary);
+    margin-bottom: 12px;
+  }
+  .start-screen p {
+    color: var(--text-light);
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 32px;
+    max-width: 360px;
+  }
+
+  /* --- Card Area --- */
+  .card-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .section-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary);
+    background: var(--primary-bg);
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 40px 28px;
+    max-width: 420px;
+    width: 100%;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    animation: cardIn 0.35s ease;
+    position: relative;
+  }
+
+  .card .question-text {
+    font-size: 20px;
+    line-height: 1.6;
+    font-weight: 500;
+  }
+
+  .card .question-number {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    font-size: 12px;
+    color: var(--text-light);
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* --- Buttons --- */
+  .actions {
+    padding: 16px 20px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 420px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+  .btn-primary:active { background: var(--primary-light); transform: scale(0.98); }
+
+  .btn-secondary {
+    background: #f3f4f6;
+    color: var(--text-light);
+  }
+  .btn-secondary:active { background: #e5e7eb; transform: scale(0.98); }
+
+  .btn-accent {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-accent:active { opacity: 0.9; transform: scale(0.98); }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+  }
+  .btn-row .btn { flex: 1; }
+
+  /* --- End Screen --- */
+  .end-screen {
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  .end-screen h2 { font-size: 24px; color: var(--primary); margin-bottom: 8px; }
+  .end-screen p { color: var(--text-light); margin-bottom: 24px; }
+
+  /* --- Log Screen --- */
+  .log-screen { padding: 20px; overflow-y: auto; }
+  .log-screen h3 {
+    font-size: 16px;
+    color: var(--primary);
+    margin-bottom: 16px;
+  }
+  .log-entry {
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 14px;
+  }
+  .log-entry .log-time {
+    font-size: 12px;
+    color: var(--text-light);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 2px;
+  }
+  .log-entry .log-section {
+    font-size: 11px;
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .log-entry .log-question {
+    margin-top: 2px;
+  }
+  .log-entry .log-skipped {
+    color: var(--accent);
+    font-size: 12px;
+  }
+
+  .log-actions {
+    padding: 16px 0;
+    display: flex;
+    gap: 10px;
+  }
+
+  /* --- Section Intro --- */
+  .section-intro {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .section-intro .section-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+  .section-intro h2 {
+    font-size: 22px;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  .section-intro p {
+    color: var(--text-light);
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 320px;
+    margin: 0 auto 24px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Start Screen ===== -->
+<div id="startScreen" class="screen active start-screen">
+  <h2>1on1 オンボーディング</h2>
+  <p>お互いを知るための対話の時間です。<br>
+  質問が1枚ずつ出てきます。<br>
+  先に自分のことを話してから、相手にも聞いてみましょう。<br><br>
+  答えにくい質問はスキップできます。</p>
+  <button class="btn btn-primary" onclick="startSession()">はじめる</button>
+</div>
+
+<!-- ===== Section Intro Screen ===== -->
+<div id="sectionIntroScreen" class="screen section-intro">
+  <div class="section-icon" id="sectionIcon"></div>
+  <h2 id="sectionTitle"></h2>
+  <p id="sectionDesc"></p>
+  <div style="font-size:13px; color:var(--text-light); margin-bottom:24px;" id="sectionTime"></div>
+  <button class="btn btn-primary" onclick="startSection()">このセクションを始める</button>
+</div>
+
+<!-- ===== Main Screen ===== -->
+<div id="mainScreen" class="screen">
+  <div class="progress-area">
+    <div class="progress-info">
+      <span id="progressLabel">セクション 1/5</span>
+      <span class="timer" id="timer">00:00</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="card-area">
+    <div class="section-label" id="currentSectionLabel">自己紹介</div>
+    <div class="card" id="card">
+      <span class="question-number" id="questionNumber"></span>
+      <div class="question-text" id="questionText"></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" onclick="nextQuestion()">次の質問へ</button>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="changeQuestion()">別の質問にする</button>
+      <button class="btn btn-secondary" onclick="showLog()">ログを見る</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== End Screen ===== -->
+<div id="endScreen" class="screen end-screen">
+  <h2>おつかれさまでした！</h2>
+  <p>対話の時間はここまでです。<br>ここから目標設定シートに移りましょう。</p>
+  <div class="actions" style="max-width:300px;">
+    <button class="btn btn-primary" onclick="showLog()">質問ログを見る</button>
+    <button class="btn btn-secondary" onclick="downloadLog()">ログをダウンロード</button>
+  </div>
+</div>
+
+<!-- ===== Log Screen ===== -->
+<div id="logScreen" class="screen log-screen">
+  <h3>質問タイムライン</h3>
+  <div id="logEntries"></div>
+  <div class="log-actions">
+    <button class="btn btn-secondary" onclick="closeLog()" style="flex:1;">戻る</button>
+    <button class="btn btn-primary" onclick="downloadLog()" style="flex:1;">ダウンロード</button>
+  </div>
+</div>
+
+<script>
+// ===== Question Data =====
+const sections = [
+  {
+    id: 'intro',
+    title: '自己紹介',
+    icon: '👋',
+    desc: 'まずはお互いのことを気軽に。先に自分から話してみましょう。',
+    time: '約10分',
+    questions: [
+      'ご出身はどちらですか？',
+      '趣味は何ですか？',
+      '休日はどんなふうに過ごしていますか？',
+      '最近ハマっていることはありますか？',
+      '好きな食べ物やお店はありますか？',
+      '最近観た映画やドラマ、読んだ本でおすすめは？',
+      '学生時代に打ち込んでいたことは？',
+      '行ってみたい場所はありますか？',
+    ]
+  },
+  {
+    id: 'values',
+    title: '大切にしていること',
+    icon: '💎',
+    desc: '価値観やライフスタイルについて。正解はありません。',
+    time: '約10分',
+    questions: [
+      '人生で一番大切にしていることは何ですか？',
+      '仕事とプライベート、理想のバランスはどんな感じですか？',
+      '「これだけは譲れない」ということはありますか？',
+      'どんな時に幸せを感じますか？',
+      '尊敬している人はいますか？どんなところを？',
+      '自分の性格を一言で表すと？',
+      'チームで働く時、自分はどんな役割が多いですか？',
+      '苦手だけど頑張っていることはありますか？',
+    ]
+  },
+  {
+    id: 'career',
+    title: '歯科医師としての歩み',
+    icon: '🦷',
+    desc: 'これまでのキャリアについて聞かせてください。',
+    time: '約10分',
+    questions: [
+      'なぜ歯科医師になろうと思いましたか？',
+      '大学院ではどんな研究をしていましたか？',
+      '補綴（義歯）の面白さはどこにありますか？',
+      '大学院で一番印象に残っていることは？',
+      '歯科医師をやっていて良かったと思う瞬間は？',
+      '臨床と研究、どちらにより惹かれますか？',
+      '患者さんとの関わりで心に残っているエピソードは？',
+      '歯科医療の中で、特に興味がある分野はありますか？',
+    ]
+  },
+  {
+    id: 'future',
+    title: '今の関心とこれから',
+    icon: '🔭',
+    desc: 'これからやりたいこと、将来のイメージを共有しましょう。',
+    time: '約10分',
+    questions: [
+      '一般診療でやってみたい治療はありますか？',
+      '3〜5年後、どうなっていたいですか？',
+      'アルバイトという働き方を選んだ理由は？',
+      '研究や学会活動は今後も続けたいですか？',
+      '歯科以外でやりたいことや興味はありますか？',
+      '将来、開業を考えていますか？',
+      'スキルアップのために取り組んでいることは？',
+      'どんな歯科医師になりたいですか？',
+    ]
+  },
+  {
+    id: 'support',
+    title: '不安と期待',
+    icon: '🤝',
+    desc: '安心して働ける環境を一緒に作るために。',
+    time: '約10分',
+    questions: [
+      '臨床で不安に感じていることはありますか？',
+      'どんなサポートがあると嬉しいですか？',
+      'この職場で楽しみにしていることは？',
+      '職場の雰囲気で大事にしたいことは？',
+      'こういう環境だと力を発揮しやすい、というのは？',
+      '困った時にどうやって相談するのが好きですか？',
+      'フィードバックはどんな形でもらえると嬉しいですか？',
+      '最後に、何か聞いてみたいことはありますか？',
+    ]
+  }
+];
+
+// ===== State =====
+let currentSection = 0;
+let currentQuestionIdx = 0;
+let usedQuestions = {}; // sectionId -> Set of used indices
+let totalAnswered = 0;
+let totalQuestions = 0;
+let sessionLog = [];
+let sessionStartTime = null;
+let timerInterval = null;
+let previousScreen = 'mainScreen';
+
+function init() {
+  sections.forEach(s => {
+    usedQuestions[s.id] = new Set();
+    totalQuestions += Math.min(4, s.questions.length); // aim for ~4 per section
+  });
+}
+init();
+
+// ===== Timer =====
+function startTimer() {
+  sessionStartTime = Date.now();
+  timerInterval = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+  const elapsed = Date.now() - sessionStartTime;
+  const min = Math.floor(elapsed / 60000);
+  const sec = Math.floor((elapsed % 60000) / 1000);
+  document.getElementById('timer').textContent =
+    `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function getTimestamp() {
+  if (!sessionStartTime) return '00:00';
+  const elapsed = Date.now() - sessionStartTime;
+  const min = Math.floor(elapsed / 60000);
+  const sec = Math.floor((elapsed % 60000) / 1000);
+  return `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+// ===== Navigation =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startSession() {
+  startTimer();
+  showSectionIntro(0);
+}
+
+function showSectionIntro(idx) {
+  currentSection = idx;
+  const section = sections[idx];
+  document.getElementById('sectionIcon').textContent = section.icon;
+  document.getElementById('sectionTitle').textContent = section.title;
+  document.getElementById('sectionDesc').textContent = section.desc;
+  document.getElementById('sectionTime').textContent = section.time;
+  showScreen('sectionIntroScreen');
+}
+
+function startSection() {
+  currentQuestionIdx = 0;
+  showScreen('mainScreen');
+  pickAndShowQuestion(false);
+}
+
+function pickAndShowQuestion(isChange) {
+  const section = sections[currentSection];
+  const used = usedQuestions[section.id];
+
+  // Find available questions
+  const available = [];
+  for (let i = 0; i < section.questions.length; i++) {
+    if (!used.has(i)) available.push(i);
+  }
+
+  if (available.length === 0) {
+    // No more questions in this section, move on
+    goToNextSection();
+    return;
+  }
+
+  // Pick a random available question
+  const pick = available[Math.floor(Math.random() * available.length)];
+  used.add(pick);
+
+  const question = section.questions[pick];
+
+  // Log
+  sessionLog.push({
+    time: getTimestamp(),
+    section: section.title,
+    sectionId: section.id,
+    question: question,
+    type: isChange ? 'changed' : 'shown',
+    realTime: new Date().toISOString()
+  });
+
+  // Update UI
+  document.getElementById('questionText').textContent = question;
+  document.getElementById('currentSectionLabel').textContent = section.icon + ' ' + section.title;
+  document.getElementById('progressLabel').textContent =
+    `セクション ${currentSection + 1}/${sections.length}`;
+
+  const answeredRatio = (currentSection / sections.length) +
+    (currentQuestionIdx / (4 * sections.length));
+  document.getElementById('progressFill').style.width =
+    `${Math.min(100, Math.round(answeredRatio * 100))}%`;
+
+  document.getElementById('questionNumber').textContent =
+    `${currentQuestionIdx + 1}`;
+
+  // Re-trigger animation
+  const card = document.getElementById('card');
+  card.style.animation = 'none';
+  card.offsetHeight; // force reflow
+  card.style.animation = 'cardIn 0.35s ease';
+}
+
+function nextQuestion() {
+  currentQuestionIdx++;
+
+  // After ~4 questions per section, offer to move to next section
+  if (currentQuestionIdx >= 4) {
+    goToNextSection();
+    return;
+  }
+
+  pickAndShowQuestion(false);
+}
+
+function changeQuestion() {
+  // Mark last log entry as skipped
+  if (sessionLog.length > 0) {
+    const last = sessionLog[sessionLog.length - 1];
+    if (last.type === 'shown') {
+      last.type = 'skipped';
+    }
+  }
+
+  // Log the skip
+  sessionLog.push({
+    time: getTimestamp(),
+    section: sections[currentSection].title,
+    sectionId: sections[currentSection].id,
+    question: '(質問を変更)',
+    type: 'action',
+    realTime: new Date().toISOString()
+  });
+
+  pickAndShowQuestion(true);
+}
+
+function goToNextSection() {
+  if (currentSection + 1 < sections.length) {
+    showSectionIntro(currentSection + 1);
+  } else {
+    // Session complete
+    clearInterval(timerInterval);
+    document.getElementById('progressFill').style.width = '100%';
+    showScreen('endScreen');
+  }
+}
+
+// ===== Log =====
+function showLog() {
+  previousScreen = document.querySelector('.screen.active').id;
+  const container = document.getElementById('logEntries');
+  container.innerHTML = '';
+
+  sessionLog.forEach(entry => {
+    if (entry.type === 'action') return; // skip action entries in display
+    const div = document.createElement('div');
+    div.className = 'log-entry';
+    div.innerHTML = `
+      <div class="log-time">${entry.time}</div>
+      <div class="log-section">${entry.section}</div>
+      <div class="log-question">${entry.question}
+        ${entry.type === 'skipped' ? '<span class="log-skipped">（スキップ）</span>' : ''}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  showScreen('logScreen');
+}
+
+function closeLog() {
+  showScreen(previousScreen);
+}
+
+function downloadLog() {
+  const data = {
+    sessionDate: new Date().toISOString().split('T')[0],
+    duration: getTimestamp(),
+    log: sessionLog.filter(e => e.type !== 'action').map(e => ({
+      timestamp: e.time,
+      realTime: e.realTime,
+      section: e.section,
+      question: e.question,
+      skipped: e.type === 'skipped'
+    }))
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `onboarding-log-${data.sessionDate}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
