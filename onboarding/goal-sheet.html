@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>目標設定シート</title>
+<style>
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print { display: none !important; }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    color: #2b2b2b;
+    background: #f5f5f5;
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+    background: white;
+    padding: 48px 40px;
+    min-height: 100vh;
+  }
+
+  /* --- Header --- */
+  .header {
+    text-align: center;
+    margin-bottom: 36px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid #2d6a4f;
+  }
+  .header h1 {
+    font-size: 22px;
+    color: #2d6a4f;
+    margin-bottom: 4px;
+  }
+  .header .subtitle {
+    font-size: 13px;
+    color: #6b7280;
+  }
+
+  /* --- Info Row --- */
+  .info-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  .info-field {
+    flex: 1;
+    border-bottom: 1.5px solid #d1d5db;
+    padding: 6px 0;
+    font-size: 14px;
+  }
+  .info-field label {
+    font-size: 12px;
+    color: #6b7280;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .info-field .write-area {
+    min-height: 20px;
+  }
+
+  /* --- Section --- */
+  .section {
+    margin-bottom: 28px;
+  }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #2d6a4f;
+    padding: 8px 14px;
+    background: #d8f3dc;
+    border-radius: 6px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* --- Goal Card --- */
+  .goal-card {
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .goal-card .goal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .goal-number {
+    width: 28px;
+    height: 28px;
+    background: #2d6a4f;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .goal-label {
+    font-size: 13px;
+    color: #6b7280;
+  }
+
+  .write-box {
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    min-height: 48px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    background: #fafafa;
+  }
+  .write-box.large {
+    min-height: 64px;
+  }
+
+  .sub-label {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .two-col {
+    display: flex;
+    gap: 12px;
+  }
+  .two-col > div {
+    flex: 1;
+  }
+
+  /* --- Compact rows --- */
+  .compact-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .compact-row .sub-label { margin-bottom: 2px; }
+  .compact-row .write-box { margin-bottom: 0; flex: 1; }
+
+  /* --- Signature --- */
+  .signature-area {
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 2px solid #e5e7eb;
+  }
+  .sig-row {
+    display: flex;
+    gap: 40px;
+    margin-top: 16px;
+  }
+  .sig-field {
+    flex: 1;
+    text-align: center;
+  }
+  .sig-line {
+    border-bottom: 1.5px solid #2b2b2b;
+    min-height: 40px;
+    margin-bottom: 6px;
+  }
+  .sig-label {
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  /* --- Footer --- */
+  .footer {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 11px;
+    color: #9ca3af;
+    font-style: italic;
+  }
+
+  /* --- Hint text --- */
+  .hint {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* --- Print Button --- */
+  .print-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #2d6a4f;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  }
+  .print-btn:hover { background: #40916c; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="header">
+    <h1>目標設定シート</h1>
+    <div class="subtitle">1on1 オンボーディング ― 一緒にゴールを目指すために</div>
+  </div>
+
+  <!-- Info -->
+  <div class="info-row">
+    <div class="info-field">
+      <label>名前</label>
+      <div class="write-area"></div>
+    </div>
+    <div class="info-field">
+      <label>日付</label>
+      <div class="write-area"></div>
+    </div>
+    <div class="info-field">
+      <label>振り返り予定日（3ヶ月後）</label>
+      <div class="write-area"></div>
+    </div>
+  </div>
+
+  <!-- Section 1: 今日の対話を振り返って -->
+  <div class="section">
+    <div class="section-title">今日の対話を振り返って</div>
+    <div class="sub-label">今日話してみて、印象に残ったことや気づいたことがあれば</div>
+    <div class="write-box large"></div>
+  </div>
+
+  <!-- Section 2: 3ヶ月後の目標 -->
+  <div class="section">
+    <div class="section-title">3ヶ月後の目標</div>
+    <p class="hint">臨床スキルだけでなく、働き方や人間関係の目標もOKです</p>
+
+    <!-- Goal 1 -->
+    <div class="goal-card">
+      <div class="goal-header">
+        <div class="goal-number">1</div>
+        <div class="goal-label">目標（臨床・スキル）</div>
+      </div>
+      <div class="sub-label">どうなっていたいか</div>
+      <div class="write-box"></div>
+      <div class="two-col">
+        <div>
+          <div class="sub-label">そのために取り組むこと</div>
+          <div class="write-box"></div>
+        </div>
+        <div>
+          <div class="sub-label">サポートしてほしいこと</div>
+          <div class="write-box"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Goal 2 -->
+    <div class="goal-card">
+      <div class="goal-header">
+        <div class="goal-number">2</div>
+        <div class="goal-label">目標（自由）</div>
+      </div>
+      <div class="sub-label">どうなっていたいか</div>
+      <div class="write-box"></div>
+      <div class="two-col">
+        <div>
+          <div class="sub-label">そのために取り組むこと</div>
+          <div class="write-box"></div>
+        </div>
+        <div>
+          <div class="sub-label">サポートしてほしいこと</div>
+          <div class="write-box"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Goal 3 -->
+    <div class="goal-card">
+      <div class="goal-header">
+        <div class="goal-number">3</div>
+        <div class="goal-label">目標（自由）</div>
+      </div>
+      <div class="sub-label">どうなっていたいか</div>
+      <div class="write-box"></div>
+      <div class="two-col">
+        <div>
+          <div class="sub-label">そのために取り組むこと</div>
+          <div class="write-box"></div>
+        </div>
+        <div>
+          <div class="sub-label">サポートしてほしいこと</div>
+          <div class="write-box"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: 院長から -->
+  <div class="section">
+    <div class="section-title">院長から</div>
+    <div class="sub-label">一緒に働くにあたって伝えたいこと・約束</div>
+    <div class="write-box large"></div>
+  </div>
+
+  <!-- Signature -->
+  <div class="signature-area">
+    <div style="font-size:13px; color:#6b7280; text-align:center;">
+      この目標に一緒に取り組んでいきましょう
+    </div>
+    <div class="sig-row">
+      <div class="sig-field">
+        <div class="sig-line"></div>
+        <div class="sig-label">本人サイン</div>
+      </div>
+      <div class="sig-field">
+        <div class="sig-line"></div>
+        <div class="sig-label">院長サイン</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">3ヶ月後にこのシートを見ながら振り返りましょう</div>
+</div>
+
+<button class="print-btn no-print" onclick="window.print()">印刷する</button>
+
+</body>
+</html>
